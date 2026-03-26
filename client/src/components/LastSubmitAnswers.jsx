@@ -4,7 +4,8 @@ import { Card, Button } from "../styles/styled";
 import { useEffect, useRef, useState } from "react";
 
 export default function LastSubmitAnswers() {
-  const { results, resultTimes, isHost, players } = useGame();
+  const { results, resultTimes, isHost, players, history, maxQuestions, gameData } =
+    useGame();
 
   const [timer, setTimer] = useState(5);
   const [hasEmitted, setHasEmitted] = useState(false);
@@ -14,6 +15,8 @@ export default function LastSubmitAnswers() {
     const player = players.find((p) => p.id === id);
     return player ? player.name : "Unknown";
   };
+  const lastRound = history[history.length - 1];
+  const currentQuestion = history.length || gameData.currentQuestion || 1;
 
   // Focus button on load
   useEffect(() => {
@@ -47,7 +50,17 @@ export default function LastSubmitAnswers() {
 
   return (
     <Card>
-      <h3 style={{ marginBottom: "20px" }}>Results</h3>
+      <div className="quesAnsWrapper">
+        <div className="quesAns">
+          <div>
+          <strong>Question<em>({maxQuestions ? `${currentQuestion}/${maxQuestions}` : currentQuestion})</em> :</strong>{" "}
+            <span>{lastRound?.question || gameData.question}</span>
+          </div>
+          <div>
+            <strong>Letter:</strong> <span>{lastRound?.letter || gameData.letter}</span>
+          </div>
+        </div>
+      </div>
 
       <div className="grayColorBox">
         {Object.entries(results).map(([id, ans]) => (

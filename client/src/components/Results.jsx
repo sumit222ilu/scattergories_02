@@ -53,41 +53,55 @@ Does NOT fit the category at all
 Completely unrelated answer
 Nonsense or meaningless response
 3. Spelling Rule
-Ignore minor spelling mistakes if the intended answer is clear (e.g., "Sajan" → "Saajan" is valid)
+Ignore minor spelling mistakes if the intended answer is clear
 If spelling is unclear or changes the meaning → 0 points
 4. Strictness Rules
 Reject fabricated or unnatural phrases → 0 points
 If it ONLY matches the starting letter but not the category → 0 points
 Allow indirect but widely understood associations
+
 Subjective answers:
+
 Common/typical → 100
 Rare/unlikely → 90
 5. Duplicate Answer Rule
+
 Case A: Exact same answer
-If both players give the exact same answer, both receive the same score (110 / 100 / 90)
+
+Rank players by time taken (fastest first)
+1st → full points
+2nd → -10 points from 1st score
+3rd → -10 points from 2nd score
+
+Same time condition:
+
+If players give the same answer at the same time, they receive the same deduction level
+
 Case B: Same answer with minor spelling difference
-Correctly spelled answer → full points
-Slightly incorrect spelling → 10 points less than the correct one
 
-Example:
-
-Correct: Tiger → 110
-Slightly misspelled: Tigder → 100
+Correct spelling → full points
+Slightly incorrect spelling → -10 points from the correct one
 6. Consistency Rule
 Apply the same strictness to all teams
 Similar types of answers must be judged equally
 Same quality answers → same score
 No contradictions across similar cases
 7. Multi-Answer Rule
-If a player gives multiple answers for one category:
+If a player gives multiple answers:
 Take the best valid answer
 Maximum score capped at 100
-8. Output
+8. Speed Bonus Rule
+Among valid answers only:
+Fastest correct answer → +10
+Second fastest correct answer → +5
+If only one valid answer → +10
+No bonus for invalid answers
+9. Output Requirements
 Show reasoning for each answer
 Provide a score table (Team1 vs Team2)
 Declare the winner
-9. Fun Teasing Tasks for Losing Team
-After declaring the winner, assign ONE light, playful teasing task`;
+10. Fun Teasing Task
+Assign ONE light, playful teasing task to the losing team 😄`;
 
     // ✅ Modern API
     if (navigator.clipboard && window.isSecureContext) {

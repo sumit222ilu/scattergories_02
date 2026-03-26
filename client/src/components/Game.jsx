@@ -36,23 +36,17 @@ export default function Game() {
   }, [answer, submitted]);
 
   return (
-    <Card>
+    <Card style={{ position: "relative" }}>
       <div className="quesAnsWrapper">
         <div className="quesAns">
           <div>
-            <strong>Question No:</strong>{" "}
-            <span>
-              {maxQuestions ? `${currentQuestion}/${maxQuestions}` : currentQuestion}
-            </span>
-          </div>
-          <div>
-            <strong>Question:</strong> <span>{gameData.question}</span>
+            <strong>Question<em>({maxQuestions ? `${currentQuestion}/${maxQuestions}` : currentQuestion})</em> :</strong> <span>{gameData.question}</span>
           </div>
           <div>
             <strong>Letter:</strong> <span>{gameData.letter}</span>
           </div>
         </div>
-        <Timer>Time Left: {timer}</Timer>
+        <Timer>Timer: {timer}</Timer>
       </div>
 
       <Input

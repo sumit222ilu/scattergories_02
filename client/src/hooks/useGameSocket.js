@@ -60,7 +60,10 @@ export default function useGameSocket() {
       setResults(data.answers);
       setResultTimes(data.answerTimes || {});
       setHistory(data.history);
-      setScreen("lastSubmitAnswers");
+      const isFinalRound =
+        Array.isArray(data.history) &&
+        data.history.length >= (data.maxQuestions || 0);
+      setScreen(isFinalRound ? "results" : "lastSubmitAnswers");
     });
 
     socket.on("gameOver", (history) => {

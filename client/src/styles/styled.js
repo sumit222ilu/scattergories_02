@@ -29,8 +29,13 @@ export const Card = styled.div`
     justify-content: space-between;
   }
   .quesAnsWrapper .quesAns {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
+    em {
+      font-size: 0.8rem;
+      margin-top: -1px;
+      color: #666;
+    }
   }
   .quesAnsWrapper .quesAns span {
     color: green;
@@ -51,7 +56,7 @@ export const Card = styled.div`
 export const Input = styled.input`
   width: 100%;
   padding: 10px;
-  margin: 6px 0;
+  margin: 16px 0 10px;
 `;
 
 export const TextArea = styled.textarea`
@@ -80,6 +85,10 @@ export const Button = styled.button`
 `;
 
 export const Timer = styled.div`
-  font-size: 20px;
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  font-size: 16px;
+  font-weight: bold;
   color: red;
 `;

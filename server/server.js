@@ -287,6 +287,7 @@ function endRound() {
       answers: game.answers,
       answerTimes: game.answerTimes,
       history: game.history,
+      maxQuestions: game.maxQuestions,
     });
   }, 200);
 }
