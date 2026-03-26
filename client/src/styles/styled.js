@@ -31,6 +31,7 @@ export const Card = styled.div`
   .quesAnsWrapper .quesAns {
     font-size: 1rem;
     font-weight: bold;
+    
     em {
       font-size: 0.8rem;
       margin-top: -1px;
