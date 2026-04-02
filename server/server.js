@@ -38,12 +38,32 @@ let game = {
   maxQuestions: 5,
   isPlaying: false,
 };
+let lastGameConfig = null;
+let nextRoundTimer = null;
+let intermissionTickTimers = [];
+
+const INTERMISSION_LEAD_MS = 200;
+const INTERMISSION_COUNTDOWN_SEC = 5;
+
+const ALLOWED_NUDGE_EMOJI = new Set(["😂", "⏰", "🐢", "👀", "🔥", "🦥", "📝", "⏳", "🐌"]);
+const NUDGE_COOLDOWN_MS = 1600;
+const nudgeLastByPlayer = {};
 
 // ⏱ TIMEOUTS
-const PLAYER_TIMEOUT = 20000;
-const HOST_TIMEOUT = 60000;
+const PLAYER_TIMEOUT = 1000;
+const HOST_TIMEOUT = 2000;
+
+function clearNextRoundSchedule() {
+  intermissionTickTimers.forEach(clearTimeout);
+  intermissionTickTimers = [];
+  if (nextRoundTimer) {
+    clearTimeout(nextRoundTimer);
+    nextRoundTimer = null;
+  }
+}
 
 function resetGame(config = {}) {
+  clearNextRoundSchedule();
   if (currentInterval) {
     clearInterval(currentInterval);
     currentInterval = null;
@@ -72,6 +92,14 @@ io.on("connection", (socket) => {
   console.log("Connected:", socket.id, playerId);
 
   socketToPlayer[socket.id] = playerId;
+  const existingPlayer = players[playerId];
+  if (existingPlayer) {
+    clearTimeout(disconnectTimers[playerId]);
+    delete disconnectTimers[playerId];
+    existingPlayer.connected = true;
+    existingPlayer.socketId = socket.id;
+    emitPlayers();
+  }
 
   // 🔥 JOIN / RECONNECT
   socket.on("join", (name) => {
@@ -95,31 +123,47 @@ io.on("connection", (socket) => {
 
     emitPlayers();
 
-    // 🔥 SEND FULL STATE
-    socket.emit("gameState", {
+    // 🔥 SEND FULL STATE (never leak other players' answers during an active round)
+    const baseState = {
       isPlaying: game.isPlaying,
       question: game.question,
       letter: game.letter,
-      answers: game.answers,
-      answerTimes: game.answerTimes,
       history: game.history,
       timer: timeLeftGlobal,
       maxQuestions: game.maxQuestions,
-    });
+    };
+    if (game.isPlaying) {
+      socket.emit("gameState", {
+        ...baseState,
+        submissionTimes: { ...game.answerTimes },
+      });
+    } else {
+      socket.emit("gameState", {
+        ...baseState,
+        answers: game.answers,
+        answerTimes: game.answerTimes,
+      });
+    }
   });
 
   // 🔥 START GAME
   socket.on("startGame", (config) => {
     if (playerId !== hostId) return;
 
+    lastGameConfig = {
+      categories: Array.isArray(config?.categories) ? config.categories : [],
+      timer: Number(config?.timer) || 60,
+      maxQuestions: Number(config?.maxQuestions) || 5,
+    };
+
     resetGame(config); // ✅ FULL CLEAN RESET
 
     startRound();
   });
 
-  // 🔥 NEXT ROUND
-  socket.on("nextRound", () => {
-    if (playerId !== hostId) return;
+  socket.on("rematch", () => {
+    if (playerId !== hostId || !lastGameConfig) return;
+    resetGame(lastGameConfig);
     startRound();
   });
 
@@ -131,6 +175,10 @@ io.on("connection", (socket) => {
     if (!game.answers[playerId]) {
       game.answers[playerId] = answer || "NA";
       game.answerTimes[playerId] = Math.max(game.timer - timeLeftGlobal, 0);
+      io.emit("playerAnswered", {
+        playerId,
+        secondsUsed: game.answerTimes[playerId],
+      });
     }
 
     const totalPlayers = Object.values(players).filter(
@@ -142,6 +190,31 @@ io.on("connection", (socket) => {
       clearInterval(currentInterval);
       endRound();
     }
+  });
+
+  socket.on("nudgeEmoji", (payload) => {
+    if (!game.isPlaying || !payload || typeof payload !== "object") return;
+
+    const from = players[playerId];
+    if (!from || !game.answers[playerId]) return;
+
+    const targetPlayerId = payload.targetPlayerId;
+    const emoji = String(payload.emoji || "");
+    if (!targetPlayerId || targetPlayerId === playerId) return;
+    if (!ALLOWED_NUDGE_EMOJI.has(emoji)) return;
+
+    const target = players[targetPlayerId];
+    if (!target || !target.connected) return;
+    if (game.answers[targetPlayerId]) return;
+
+    const now = Date.now();
+    if (now - (nudgeLastByPlayer[playerId] || 0) < NUDGE_COOLDOWN_MS) return;
+    nudgeLastByPlayer[playerId] = now;
+
+    io.to(target.socketId).emit("incomingNudgeEmoji", {
+      emoji,
+      fromName: from.name,
+    });
   });
 
   // 🔥 ON LEAVEGAME BUTTON CLICK
@@ -169,8 +242,10 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const pid = socketToPlayer[socket.id];
     const player = players[pid];
+    delete socketToPlayer[socket.id];
 
     if (!player) return;
+    if (player.socketId !== socket.id) return;
 
     player.connected = false;
 
@@ -220,6 +295,7 @@ function getNextQuestion() {
 
 // 🔥 START ROUND
 function startRound() {
+  clearNextRoundSchedule();
   if (currentInterval) clearInterval(currentInterval);
 
   if (game.history.length >= game.maxQuestions) {
@@ -289,6 +365,23 @@ function endRound() {
       history: game.history,
       maxQuestions: game.maxQuestions,
     });
+
+    const isFinal = game.history.length >= game.maxQuestions;
+    if (!isFinal) {
+      clearNextRoundSchedule();
+      for (let i = 0; i < INTERMISSION_COUNTDOWN_SEC; i++) {
+        const n = INTERMISSION_COUNTDOWN_SEC - i;
+        intermissionTickTimers.push(
+          setTimeout(() => {
+            io.emit("nextRoundCountdown", { n });
+          }, INTERMISSION_LEAD_MS + i * 1000),
+        );
+      }
+      nextRoundTimer = setTimeout(() => {
+        nextRoundTimer = null;
+        startRound();
+      }, INTERMISSION_LEAD_MS + INTERMISSION_COUNTDOWN_SEC * 1000);
+    }
   }, 200);
 }
 

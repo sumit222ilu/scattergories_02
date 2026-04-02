@@ -32,76 +32,88 @@ export default function Results() {
 
     const finalText = `I am playing Scattergories. Here are the collected answers:
 ${resultsText}
-
-Please evaluate Scattergories answers using these rules:
-
+Scattergories Evaluation Rules (Final Version)
 1. Basic Requirements
-The answer must start with the given letter (ignore spaces).
-The answer must clearly fit the category.
+Answer must start with the given letter (ignore spaces).
+Answer must clearly fit the category.
 2. Scoring
 110 points → Fully correct
 Real, commonly accepted answer
-Direct and obvious match to category
+Direct and obvious match
 100 points → Mostly correct (>60%)
-Indirect but reasonable association
-Clearly recognizable and relevant
+Indirect but reasonable
+Clearly recognizable
 90 points → Weak answer (<60%)
-Very loose or uncommon connection
-Forced but still somewhat related
+Loose or uncommon connection
 0 points → Invalid
-Does NOT fit the category at all
-Completely unrelated answer
-Nonsense or meaningless response
+Does not fit category
+Unrelated / nonsense
 3. Spelling Rule
-Ignore minor spelling mistakes if the intended answer is clear
-If spelling is unclear or changes the meaning → 0 points
+Minor spelling mistakes → ignore (if intent clear)
+Unclear / meaning changes → 0 points
 4. Strictness Rules
-Reject fabricated or unnatural phrases → 0 points
-If it ONLY matches the starting letter but not the category → 0 points
-Allow indirect but widely understood associations
+No fabricated / unnatural phrases → 0 points
+Only matching letter but not category → 0 points
+Indirect but commonly understood → allowed
 
 Subjective answers:
 
-Common/typical → 100
-Rare/unlikely → 90
+Common → 100
+Rare → 90
 5. Duplicate Answer Rule
 
 Case A: Exact same answer
 
-Rank players by time taken (fastest first)
+Rank by time (fastest first)
 1st → full points
-2nd → -10 points from 1st score
-3rd → -10 points from 2nd score
+2nd → -10
+3rd → -20
 
-Same time condition:
+Same time:
 
-If players give the same answer at the same time, they receive the same deduction level
+Same deduction level
 
-Case B: Same answer with minor spelling difference
+Case B: Same answer (spelling variation)
 
 Correct spelling → full points
-Slightly incorrect spelling → -10 points from the correct one
+Slight mistake → -10
 6. Consistency Rule
-Apply the same strictness to all teams
-Similar types of answers must be judged equally
-Same quality answers → same score
-No contradictions across similar cases
+Same type of answers → same score
+No contradictions
+Equal strictness across all players
 7. Multi-Answer Rule
-If a player gives multiple answers:
-Take the best valid answer
-Maximum score capped at 100
+Pick best valid answer
+Max score = 100
 8. Speed Bonus Rule
-Among valid answers only:
-Fastest correct answer → +10
-Second fastest correct answer → +5
-If only one valid answer → +10
-No bonus for invalid answers
-9. Output Requirements
-Show reasoning for each answer
-Provide a score table (Team1 vs Team2)
-Declare the winner
-10. Fun Teasing Task
-Assign ONE light, playful teasing task to the losing team 😄`;
+
+(Only valid answers)
+
+Fastest → +10
+Second fastest → +5
+Only one valid → +10
+Invalid → no bonus
+9. Output Format (Compact View Only)
+
+For each question:
+
+Evaluate each player:
+Answer
+Reason (short)
+Base score
+Speed bonus
+Final score
+
+Then:
+
+Final Ranking (sorted by total score):
+
+Player – Score
+Player – Score
+Player – Score
+10. Winner
+Declare winner (highest total score)
+11. Fun Teasing Task 😄
+Give ONE playful, light task to the losing team`;
 
     // ✅ Modern API
     if (navigator.clipboard && window.isSecureContext) {
@@ -158,6 +170,7 @@ Assign ONE light, playful teasing task to the losing team 😄`;
         <Button onClick={() => copyToClipboard(true)}>
           Copy for AI Evaluation
         </Button>
+        {isHost && <Button onClick={() => socket.emit("rematch")}>Rematch</Button>}
       </Card>
       <Card className="historyWrapper">
         <h3>History</h3>

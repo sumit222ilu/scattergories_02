@@ -6,7 +6,6 @@ import Join from "./components/Join";
 import Lobby from "./components/Lobby";
 import Game from "./components/Game";
 import Results from "./components/Results";
-import LastSubmitAnswers from "./components/LastSubmitAnswers";
 import { Page, Button } from "./styles/styled";
 
 function Main() {
@@ -44,7 +43,6 @@ function Main() {
       {screen === "join" && <Join />}
       {screen === "lobby" && <Lobby />}
       {screen === "game" && <Game />}
-      {screen === "lastSubmitAnswers" && <LastSubmitAnswers />}
       {screen === "results" && <Results />}
     </Page>
   );

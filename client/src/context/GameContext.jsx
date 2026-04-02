@@ -12,6 +12,9 @@ export function GameProvider({ children }) {
   const [resultTimes, setResultTimes] = useState({});
   const [history, setHistory] = useState([]);
   const [maxQuestions, setMaxQuestions] = useState(0);
+  /** Between rounds: show answers + countdown; cleared on gameStart */
+  const [intermission, setIntermission] = useState(null);
+  const [nextRoundCountdown, setNextRoundCountdown] = useState(null);
 
   return (
     <GameContext.Provider
@@ -34,6 +37,10 @@ export function GameProvider({ children }) {
         setHistory,
         maxQuestions,
         setMaxQuestions,
+        intermission,
+        setIntermission,
+        nextRoundCountdown,
+        setNextRoundCountdown,
       }}
     >
       {children}
